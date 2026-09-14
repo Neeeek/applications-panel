@@ -14,7 +14,7 @@ export function App() {
   const [loadMode, setLoadMode] = useState<LoadMode>("success");
   const [requestState, setRequestState] = useState<RequestState>({ status: "loading" });
   const [searchValue, setSearchValue] = useState("");
-  const [statusValue, setStatusValue] = useState("");
+  const [filterValue, setFilterValue] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -35,21 +35,23 @@ export function App() {
     window.alert(`Akcja "${actionName}" dla wniosku ${row.loanId} (nieobsłużona w tym MVP)`);
   }
 
-  const statusColumn =
-    requestState.status === "success" ? requestState.data.columns.find((c) => c.key === "status") : undefined;
+  const filterColumn =
+    requestState.status === "success"
+      ? requestState.data.columns.find((c) => c.filterable && c.options)
+      : undefined;
 
   const columnFilters: ColumnFiltersState =
-    statusColumn && statusValue ? [{ id: statusColumn.key, value: statusValue }] : [];
+    filterColumn && filterValue ? [{ id: filterColumn.key, value: filterValue }] : [];
 
   return (
     <main>
       <h1>Panel wniosków</h1>
       <Toolbar
-        statusColumn={statusColumn}
+        filterColumn={filterColumn}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        statusValue={statusValue}
-        onStatusChange={setStatusValue}
+        filterValue={filterValue}
+        onFilterChange={setFilterValue}
         loadMode={loadMode}
         onLoadModeChange={setLoadMode}
       />

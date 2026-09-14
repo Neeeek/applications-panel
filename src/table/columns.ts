@@ -13,7 +13,10 @@ function sortingFnFor(type: ColumnMeta["type"]): SortingFn<ApplicationRow> {
       compareDate(rowA.getValue<string | null>(columnId), rowB.getValue<string | null>(columnId));
   }
   return (rowA, rowB, columnId) =>
-    compareText(String(rowA.getValue(columnId) ?? ""), String(rowB.getValue(columnId) ?? ""));
+    compareText(
+      rowA.getValue<string | null | undefined>(columnId),
+      rowB.getValue<string | null | undefined>(columnId)
+    );
 }
 
 function filterFnFor(column: ColumnMeta): FilterFn<ApplicationRow> | undefined {
@@ -34,11 +37,13 @@ export function buildColumnDefs(
 ): ColumnDef<ApplicationRow>[] {
   return visibleColumnsInOrder(columns).map((column) => ({
     id: column.key,
-    accessorKey: column.key,
+    accessorFn: (row) => row[column.key as keyof ApplicationRow] ?? undefined,
     header: column.label,
     enableSorting: column.sortable,
     enableColumnFilter: column.filterable,
     sortingFn: sortingFnFor(column.type),
+    sortUndefined: "last" as const,
+    sortDescFirst: false,
     filterFn: filterFnFor(column),
     cell: (context: CellContext<ApplicationRow, unknown>) =>
       renderCell({ row: context.row.original, column, onAction }),

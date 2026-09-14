@@ -1,11 +1,11 @@
 import type { ColumnMeta, LoadMode } from "../types";
 
 export interface ToolbarProps {
-  statusColumn?: ColumnMeta;
+  filterColumn?: ColumnMeta;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  statusValue: string;
-  onStatusChange: (value: string) => void;
+  filterValue: string;
+  onFilterChange: (value: string) => void;
   loadMode: LoadMode;
   onLoadModeChange: (mode: LoadMode) => void;
 }
@@ -13,11 +13,11 @@ export interface ToolbarProps {
 const LOAD_MODES: LoadMode[] = ["success", "empty", "error"];
 
 export function Toolbar({
-  statusColumn,
+  filterColumn,
   searchValue,
   onSearchChange,
-  statusValue,
-  onStatusChange,
+  filterValue,
+  onFilterChange,
   loadMode,
   onLoadModeChange,
 }: ToolbarProps) {
@@ -30,14 +30,14 @@ export function Toolbar({
         value={searchValue}
         onChange={(event) => onSearchChange(event.target.value)}
       />
-      {statusColumn?.options && (
+      {filterColumn?.options && (
         <select
           aria-label="Status"
-          value={statusValue}
-          onChange={(event) => onStatusChange(event.target.value)}
+          value={filterValue}
+          onChange={(event) => onFilterChange(event.target.value)}
         >
           <option value="">Wszystkie statusy</option>
-          {statusColumn.options.map((option) => (
+          {filterColumn.options.map((option) => (
             <option key={option} value={option}>
               {option}
             </option>

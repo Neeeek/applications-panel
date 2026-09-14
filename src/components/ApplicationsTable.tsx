@@ -9,7 +9,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import type { ApplicationRow, ColumnMeta } from "../types";
-import { buildColumnDefs } from "../table/columns";
+import { buildColumnDefs, visibleColumnsInOrder } from "../table/columns";
 
 export interface ApplicationsTableProps {
   columns: ColumnMeta[];
@@ -22,7 +22,9 @@ export interface ApplicationsTableProps {
 export function ApplicationsTable({ columns, rows, globalFilter, columnFilters, onAction }: ApplicationsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const columnDefs = buildColumnDefs(columns, onAction);
-  const searchableKeys = columns.filter((c) => c.filterable && c.type === "text").map((c) => c.key);
+  const searchableKeys = visibleColumnsInOrder(columns)
+    .filter((c) => c.filterable && c.type === "text")
+    .map((c) => c.key);
 
   const table = useReactTable({
     data: rows,

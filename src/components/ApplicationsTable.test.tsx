@@ -45,6 +45,62 @@ describe("ApplicationsTable", () => {
     expect(within(dataRows[0]).getByText("Anna")).toBeInTheDocument();
   });
 
+  it("keeps a null-bearing row last on both ascending and descending clicks", async () => {
+    const numericColumns: ColumnMeta[] = [
+      { key: "customerName", label: "Klient", type: "text", sortable: true, filterable: true },
+      { key: "monthlyRate", label: "Rata", type: "currency", sortable: true, filterable: false },
+    ];
+    const numericRows: ApplicationRow[] = [
+      {
+        loanId: "LN-1",
+        customerName: "Zoe",
+        status: "new",
+        market: "PL",
+        monthlyRate: 100,
+        updatedAt: "2024-01-01T00:00:00Z",
+        permissions: {},
+      },
+      {
+        loanId: "LN-2",
+        customerName: "Anna",
+        status: "new",
+        market: "PL",
+        monthlyRate: null,
+        updatedAt: "2024-01-02T00:00:00Z",
+        permissions: {},
+      },
+      {
+        loanId: "LN-3",
+        customerName: "Marek",
+        status: "new",
+        market: "PL",
+        monthlyRate: 50,
+        updatedAt: "2024-01-03T00:00:00Z",
+        permissions: {},
+      },
+    ];
+
+    render(
+      <ApplicationsTable
+        columns={numericColumns}
+        rows={numericRows}
+        globalFilter=""
+        columnFilters={[]}
+        onAction={vi.fn()}
+      />
+    );
+    const user = userEvent.setup();
+    const header = screen.getByRole("button", { name: /rata/i });
+
+    await user.click(header);
+    let dataRows = screen.getAllByRole("row").slice(1);
+    expect(within(dataRows[dataRows.length - 1]).getByText("Anna")).toBeInTheDocument();
+
+    await user.click(header);
+    dataRows = screen.getAllByRole("row").slice(1);
+    expect(within(dataRows[dataRows.length - 1]).getByText("Anna")).toBeInTheDocument();
+  });
+
   it("renders a disabled action as non-interactive for a row without permission", () => {
     renderTable();
     const dataRows = screen.getAllByRole("row").slice(1);
