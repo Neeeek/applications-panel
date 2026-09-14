@@ -91,7 +91,7 @@ export function isActionAvailable(row: ApplicationRow, columnKey: string): boole
   }
   ```
 
-## Co zrobił(a)bym dalej przy dodatkowych 60-90 minutach
+## Co zrobił bym dalej przy dodatkowych 60-90 minutach
 
 - Prawdziwy formularz edycji za akcją `edit` (obecnie zaślepka `window.alert`).
 - Paginacja lub wirtualizacja wierszy — obecnie renderujemy wszystkie 1200
