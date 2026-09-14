@@ -1,75 +1,102 @@
-# ai-boilerplate
+# Panel wniosków — tabela sterowana metadanymi
 
-A template repository carrying a working Claude Code setup: a routing table,
-five agents, a curated vendored skill library, tuned permissions, and a docs
-scaffold. Stack-agnostic — it ships no `package.json`, no framework, no test
-runner.
-
-## Use it
+## Uruchomienie
 
 ```bash
-npx degit <your-user>/ai-boilerplate my-project
-cd my-project
+npm install
+npm run dev
 ```
 
-Open the project in Claude Code. A SessionStart hook registers the vendored
-plugins on first run; restart Claude Code when it says to. Then:
+Skrypty:
+- `npm run dev` — serwer deweloperski
+- `npm run typecheck` — sprawdzenie typów (`tsc -b`)
+- `npm run test` — testy jednostkowe i komponentowe (Vitest + React Testing Library)
 
-```
-/setup
-```
+## Model metadanych
 
-## What is in here
+Kolumny (`data/columns.json`) opisują `key`, `label`, `type`
+(`text | badge | currency | date | action`), `sortable`, `filterable`,
+opcjonalnie `options` (np. lista statusów) i `action` (nazwa akcji wiersza).
+Kolejność w tablicy JSON wyznacza kolejność kolumn; opcjonalne pola `order`
+i `visible` (domyślnie `true`) pozwalają nadpisać kolejność/widoczność bez
+zmiany kodu, gdyby metadane w przyszłości je zawierały.
 
-| Path | What |
-|---|---|
-| `CLAUDE.md` | Routing table, working agreements, docs discipline |
-| `CONTEXT.md` | Project facts an agent cannot infer from code |
-| `.claude/agents/` | orchestrator, agent-builder, architect, docs-keeper, code-reviewer |
-| `.claude/marketplace/` | Vendored plugins (~1.1MB), curated per-skill |
-| `.claude/skills/` | Project-local skills |
-| `.claude/commands/` | Custom commands (`/setup`) |
-| `scripts/` | Bootstrap, vendoring, and their checks |
-| `docs/` | Changelog, ADRs, ideas, specs and plans |
+**Założenie dot. kształtu danych:** kolumna `canEdit` ma `type: "action"`,
+ale wiersze przechowują tę flagę zagnieżdżoną w `row.permissions.canEdit`,
+a nie na najwyższym poziomie. Przyjęta konwencja: dla kolumn typu `action`
+dostępność akcji jest odczytywana z `row.permissions[column.key]` — patrz
+`src/components/ApplicationsTable/actionAvailability.ts`:
 
-## Vendored skills
-
-| Plugin | Skills | Why |
-|---|---|---|
-| superpowers | all 14 | Process: brainstorming, planning, TDD, debugging, verification |
-| mattpocock-skills | 10 of 35 | Craft references with no superpowers equivalent |
-| ponytail | all | Lazy-senior-dev mode, active via hook |
-
-Curation rationale is in `docs/decisions/0001-vendored-curated-skill-library.md`.
-
-## Maintenance
-
-```bash
-./scripts/sync-plugins.sh      # update vendored plugins, then review the diff
-./scripts/check-vendoring.sh   # assert the vendored tree is correct
-./scripts/check-bootstrap.sh   # assert bootstrap's guard and exit-0 behavior
+```ts
+export function isActionAvailable(row: ApplicationRow, columnKey: string): boolean {
+  return row.permissions?.[columnKey] === true;
+}
 ```
 
-## Turning off the automatic bootstrap
+## Decyzje techniczne
 
-Remove the `hooks` block from `.claude/settings.json` and run
-`./scripts/bootstrap.sh` by hand instead.
+- **TanStack Table (headless)** do modelu kolumn/sortowania/filtrowania —
+  biblioteka bez narzuconego UI, więc cała warstwa wizualna pozostaje
+  w naszej gestii i proporcjonalna do zakresu zadania.
+- **Tailwind CSS** (utility-first) dla stylów — klasy narzędziowe kolokowane
+  z komponentami zamiast globalnego arkusza reguł.
+- Brak realnego backendu — `src/api/applicationsAdapter.ts` symuluje
+  żądanie (opóźnienie + tryb `success | empty | error` sterowany
+  przełącznikiem w toolbarze), żeby stany `loading/success/empty/error`
+  były deterministyczne i łatwe do przetestowania.
 
-## Recovering after the project is moved or renamed
+## Zasady programowania
 
-The CLI registers the marketplace by absolute path in (gitignored)
-`.claude/settings.local.json`. If the project directory is later moved or
-renamed, that path goes stale and the bootstrap guard silently short-circuits
-forever, since it only checks that the file exists. Recover with:
+- **Open/Closed Principle** — dodanie nowego typu wartości kolumny wymaga
+  tylko nowego wpisu w rejestrze `src/components/ApplicationsTable/cellRenderers.tsx`, bez zmian
+  w `ApplicationsTable` czy `columns.ts` (kod z `renderCell`):
 
-```bash
-rm -f .claude/settings.local.json && ./scripts/bootstrap.sh
-```
+  ```ts
+  export function renderCell(props: CellRendererProps): ReactNode {
+    const { row, column } = props;
+    switch (column.type) {
+      case "date":
+        return renderDate(row, column);
+      case "currency":
+        return renderCurrency(row, column);
+      case "badge":
+        return renderBadge(row, column);
+      case "action":
+        return renderAction(props);
+      case "text":
+      default:
+        return renderText(row, column);
+    }
+  }
+  ```
 
-## Optional: context7
+- **Obrona przed brakującymi danymi (defensive design)** — komparatory
+  sortowania (`src/components/ApplicationsTable/sorting.ts`) zawsze umieszczają `null`/`undefined`
+  na końcu, niezależnie od kierunku sortowania, mimo że bieżące dane
+  (`data/rows.json`) nie zawierają braków — bo metadane, nie stan
+  bieżących danych, są źródłem prawdy o kontrakcie:
 
-Library and API questions route to context7. It is not installed by default:
+  ```ts
+  function compareWithNullsLast<T>(
+    a: T | null | undefined,
+    b: T | null | undefined,
+    compare: (a: T, b: T) => number
+  ): number {
+    const aMissing = a === null || a === undefined;
+    const bMissing = b === null || b === undefined;
+    if (aMissing && bMissing) return 0;
+    if (aMissing) return 1;
+    if (bMissing) return -1;
+    return compare(a, b);
+  }
+  ```
 
-```bash
-claude mcp add context7 -- npx -y @upstash/context7-mcp
-```
+## Co zrobił(a)bym dalej przy dodatkowych 60-90 minutach
+
+- Prawdziwy formularz edycji za akcją `edit` (obecnie zaślepka `window.alert`).
+- Paginacja lub wirtualizacja wierszy — obecnie renderujemy wszystkie 1200
+  wierszy naraz, co działa, ale nie skaluje się do dziesiątek tysięcy.
+- Test integracyjny E2E (np. Playwright) pokrywający pełny przepływ
+  filtrowania + sortowania + akcji na żywej stronie.
+- Więcej testów brzegowych dla `columns.ts` (np. kolumna bez `options`
+  przy próbie filtrowania).
