@@ -1,75 +1,32 @@
-# ai-boilerplate
+# React + TypeScript + Vite
 
-A template repository carrying a working Claude Code setup: a routing table,
-five agents, a curated vendored skill library, tuned permissions, and a docs
-scaffold. Stack-agnostic — it ships no `package.json`, no framework, no test
-runner.
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-## Use it
+Currently, two official plugins are available:
 
-```bash
-npx degit <your-user>/ai-boilerplate my-project
-cd my-project
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the Oxlint configuration
+
+If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
 ```
 
-Open the project in Claude Code. A SessionStart hook registers the vendored
-plugins on first run; restart Claude Code when it says to. Then:
-
-```
-/setup
-```
-
-## What is in here
-
-| Path | What |
-|---|---|
-| `CLAUDE.md` | Routing table, working agreements, docs discipline |
-| `CONTEXT.md` | Project facts an agent cannot infer from code |
-| `.claude/agents/` | orchestrator, agent-builder, architect, docs-keeper, code-reviewer |
-| `.claude/marketplace/` | Vendored plugins (~1.1MB), curated per-skill |
-| `.claude/skills/` | Project-local skills |
-| `.claude/commands/` | Custom commands (`/setup`) |
-| `scripts/` | Bootstrap, vendoring, and their checks |
-| `docs/` | Changelog, ADRs, ideas, specs and plans |
-
-## Vendored skills
-
-| Plugin | Skills | Why |
-|---|---|---|
-| superpowers | all 14 | Process: brainstorming, planning, TDD, debugging, verification |
-| mattpocock-skills | 10 of 35 | Craft references with no superpowers equivalent |
-| ponytail | all | Lazy-senior-dev mode, active via hook |
-
-Curation rationale is in `docs/decisions/0001-vendored-curated-skill-library.md`.
-
-## Maintenance
-
-```bash
-./scripts/sync-plugins.sh      # update vendored plugins, then review the diff
-./scripts/check-vendoring.sh   # assert the vendored tree is correct
-./scripts/check-bootstrap.sh   # assert bootstrap's guard and exit-0 behavior
-```
-
-## Turning off the automatic bootstrap
-
-Remove the `hooks` block from `.claude/settings.json` and run
-`./scripts/bootstrap.sh` by hand instead.
-
-## Recovering after the project is moved or renamed
-
-The CLI registers the marketplace by absolute path in (gitignored)
-`.claude/settings.local.json`. If the project directory is later moved or
-renamed, that path goes stale and the bootstrap guard silently short-circuits
-forever, since it only checks that the file exists. Recover with:
-
-```bash
-rm -f .claude/settings.local.json && ./scripts/bootstrap.sh
-```
-
-## Optional: context7
-
-Library and API questions route to context7. It is not installed by default:
-
-```bash
-claude mcp add context7 -- npx -y @upstash/context7-mcp
-```
+See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
