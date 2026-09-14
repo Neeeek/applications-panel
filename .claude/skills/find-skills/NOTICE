@@ -1,0 +1,6 @@
+This skill was copied from the global `find-skills` skill bundled with the
+Skills CLI / skills.sh ecosystem (`npx skills`), via a local
+`~/.claude/skills/find-skills/` install, per
+docs/superpowers/plans/2026-09-02-ai-boilerplate.md (Task 3). Not
+independently authored by this project; content and copyright belong to the
+upstream skills.sh project.

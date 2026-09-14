@@ -1,0 +1,70 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(file:*)",
+      "Bash(du:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm install)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm install)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vitest:*)",
+      "Bash(./scripts/check-vendoring.sh)",
+      "Bash(./scripts/check-bootstrap.sh)",
+      "Bash(claude plugin list)",
+      "Edit(.claude/**)",
+      "Write(.claude/**)",
+      "Edit(docs/**)",
+      "Write(docs/**)",
+      "Edit(CLAUDE.md)",
+      "Edit(CONTEXT.md)"
+    ],
+    "deny": [
+      "Bash(sudo:*)",
+      "Bash(rm -rf:*)",
+      "Bash(chmod 777:*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Write(~/.claude/settings.json)",
+      "Edit(~/.claude/settings.json)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/scripts/bootstrap.sh\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
