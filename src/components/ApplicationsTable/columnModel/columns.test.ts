@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { visibleColumnsInOrder } from "./columns";
-import type { ColumnMeta } from "../types";
+import type { ColumnMeta } from "../../../types";
 
 const base: Omit<ColumnMeta, "key" | "label"> = {
   type: "text",

@@ -1,35 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ColumnFiltersState } from "@tanstack/react-table";
-import { fetchApplications, type ApplicationsPayload } from "./api/applicationsAdapter";
 import type { ApplicationRow, LoadMode } from "./types";
 import { ApplicationsTable } from "./components/ApplicationsTable";
 import { Toolbar } from "./components/Toolbar";
+import { useApplications } from "./hooks/useApplications";
+import { useDebouncedValue } from "./hooks/useDebouncedValue";
 
-type RequestState =
-  | { status: "loading" }
-  | { status: "success"; data: ApplicationsPayload }
-  | { status: "error"; message: string };
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function App() {
   const [loadMode, setLoadMode] = useState<LoadMode>("success");
-  const [requestState, setRequestState] = useState<RequestState>({ status: "loading" });
   const [searchValue, setSearchValue] = useState("");
   const [filterValue, setFilterValue] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    setRequestState({ status: "loading" });
-    fetchApplications(loadMode)
-      .then((data) => {
-        if (!cancelled) setRequestState({ status: "success", data });
-      })
-      .catch((error: Error) => {
-        if (!cancelled) setRequestState({ status: "error", message: error.message });
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [loadMode]);
+  const requestState = useApplications(loadMode);
+  const debouncedSearchValue = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
 
   function handleAction(actionName: string, row: ApplicationRow) {
     window.alert(`Akcja "${actionName}" dla wniosku ${row.loanId} (nieobsłużona w tym MVP)`);
@@ -44,8 +28,8 @@ export function App() {
     filterColumn && filterValue ? [{ id: filterColumn.key, value: filterValue }] : [];
 
   return (
-    <main>
-      <h1>Panel wniosków</h1>
+    <main className="p-8 font-sans text-gray-900">
+      <h1 className="text-2xl font-bold mb-4">Panel wniosków</h1>
       <Toolbar
         filterColumn={filterColumn}
         searchValue={searchValue}
@@ -64,7 +48,7 @@ export function App() {
         <ApplicationsTable
           columns={requestState.data.columns}
           rows={requestState.data.rows}
-          globalFilter={searchValue}
+          globalFilter={debouncedSearchValue}
           columnFilters={columnFilters}
           onAction={handleAction}
         />

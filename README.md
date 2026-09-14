@@ -25,7 +25,7 @@ zmiany kodu, gdyby metadane w przyszłości je zawierały.
 ale wiersze przechowują tę flagę zagnieżdżoną w `row.permissions.canEdit`,
 a nie na najwyższym poziomie. Przyjęta konwencja: dla kolumn typu `action`
 dostępność akcji jest odczytywana z `row.permissions[column.key]` — patrz
-`src/table/actionAvailability.ts`:
+`src/components/ApplicationsTable/actionAvailability.ts`:
 
 ```ts
 export function isActionAvailable(row: ApplicationRow, columnKey: string): boolean {
@@ -38,7 +38,8 @@ export function isActionAvailable(row: ApplicationRow, columnKey: string): boole
 - **TanStack Table (headless)** do modelu kolumn/sortowania/filtrowania —
   biblioteka bez narzuconego UI, więc cała warstwa wizualna pozostaje
   w naszej gestii i proporcjonalna do zakresu zadania.
-- Brak frameworka CSS — zwykły CSS, bo zakres wizualny jest mały.
+- **Tailwind CSS** (utility-first) dla stylów — klasy narzędziowe kolokowane
+  z komponentami zamiast globalnego arkusza reguł.
 - Brak realnego backendu — `src/api/applicationsAdapter.ts` symuluje
   żądanie (opóźnienie + tryb `success | empty | error` sterowany
   przełącznikiem w toolbarze), żeby stany `loading/success/empty/error`
@@ -47,7 +48,7 @@ export function isActionAvailable(row: ApplicationRow, columnKey: string): boole
 ## Zasady programowania
 
 - **Open/Closed Principle** — dodanie nowego typu wartości kolumny wymaga
-  tylko nowego wpisu w rejestrze `src/table/cellRenderers.tsx`, bez zmian
+  tylko nowego wpisu w rejestrze `src/components/ApplicationsTable/cellRenderers.tsx`, bez zmian
   w `ApplicationsTable` czy `columns.ts` (kod z `renderCell`):
 
   ```ts
@@ -70,7 +71,7 @@ export function isActionAvailable(row: ApplicationRow, columnKey: string): boole
   ```
 
 - **Obrona przed brakującymi danymi (defensive design)** — komparatory
-  sortowania (`src/table/sorting.ts`) zawsze umieszczają `null`/`undefined`
+  sortowania (`src/components/ApplicationsTable/sorting.ts`) zawsze umieszczają `null`/`undefined`
   na końcu, niezależnie od kierunku sortowania, mimo że bieżące dane
   (`data/rows.json`) nie zawierają braków — bo metadane, nie stan
   bieżących danych, są źródłem prawdy o kontrakcie:
@@ -95,7 +96,6 @@ export function isActionAvailable(row: ApplicationRow, columnKey: string): boole
 - Prawdziwy formularz edycji za akcją `edit` (obecnie zaślepka `window.alert`).
 - Paginacja lub wirtualizacja wierszy — obecnie renderujemy wszystkie 1200
   wierszy naraz, co działa, ale nie skaluje się do dziesiątek tysięcy.
-- Debounce pola wyszukiwania tekstowego.
 - Test integracyjny E2E (np. Playwright) pokrywający pełny przepływ
   filtrowania + sortowania + akcji na żywej stronie.
 - Więcej testów brzegowych dla `columns.ts` (np. kolumna bez `options`

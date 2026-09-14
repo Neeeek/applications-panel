@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ApplicationsTable } from "./ApplicationsTable";
-import type { ApplicationRow, ColumnMeta } from "../types";
+import type { ApplicationRow, ColumnMeta } from "../../types";
 
 const columns: ColumnMeta[] = [
   { key: "customerName", label: "Klient", type: "text", sortable: true, filterable: true },

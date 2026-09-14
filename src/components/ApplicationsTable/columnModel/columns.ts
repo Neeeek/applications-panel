@@ -1,5 +1,5 @@
 import type { CellContext, ColumnDef, FilterFn, SortingFn } from "@tanstack/react-table";
-import type { ApplicationRow, ColumnMeta } from "../types";
+import type { ApplicationRow, ColumnMeta } from "../../../types";
 import { compareDate, compareNumber, compareText } from "./sorting";
 import { renderCell } from "./cellRenderers";
 

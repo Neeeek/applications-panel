@@ -5,19 +5,11 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
-  type ColumnFiltersState,
   type SortingState,
 } from "@tanstack/react-table";
-import type { ApplicationRow, ColumnMeta } from "../types";
-import { buildColumnDefs, visibleColumnsInOrder } from "../table/columns";
-
-export interface ApplicationsTableProps {
-  columns: ColumnMeta[];
-  rows: ApplicationRow[];
-  globalFilter: string;
-  columnFilters: ColumnFiltersState;
-  onAction: (actionName: string, row: ApplicationRow) => void;
-}
+import type { ApplicationRow } from "../../types";
+import { buildColumnDefs, visibleColumnsInOrder } from "./columnModel";
+import type { ApplicationsTableProps } from "./types";
 
 export function ApplicationsTable({ columns, rows, globalFilter, columnFilters, onAction }: ApplicationsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -44,14 +36,14 @@ export function ApplicationsTable({ columns, rows, globalFilter, columnFilters, 
   });
 
   return (
-    <table>
+    <table className="w-full border-collapse">
       <thead>
         {table.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
-              <th key={header.id}>
+              <th key={header.id} className="border border-gray-300 p-2 text-left">
                 {header.column.getCanSort() ? (
-                  <button type="button" onClick={header.column.getToggleSortingHandler()}>
+                  <button type="button" className="font-semibold cursor-pointer" onClick={header.column.getToggleSortingHandler()}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
                     {header.column.getIsSorted() === "asc" && " ▲"}
                     {header.column.getIsSorted() === "desc" && " ▼"}
@@ -68,7 +60,9 @@ export function ApplicationsTable({ columns, rows, globalFilter, columnFilters, 
         {table.getRowModel().rows.map((row) => (
           <tr key={row.id}>
             {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+              <td key={cell.id} className="border border-gray-300 p-2 text-left">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
             ))}
           </tr>
         ))}

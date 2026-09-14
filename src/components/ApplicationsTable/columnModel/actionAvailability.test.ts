@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isActionAvailable } from "./actionAvailability";
-import type { ApplicationRow } from "../types";
+import type { ApplicationRow } from "../../../types";
 
 const baseRow: ApplicationRow = {
   loanId: "LN-1",

@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
-import type { ApplicationRow, ColumnMeta } from "../types";
+import type { ApplicationRow, ColumnMeta } from "../../../types";
 import { isActionAvailable } from "./actionAvailability";
-
-const dateFormatter = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium" });
-const currencyFormatter = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" });
+import { currencyFormatter, dateFormatter, DEFAULT_BADGE_CLASSES, STATUS_BADGE_CLASSES } from "./constants";
 
 export interface CellRendererProps {
   row: ApplicationRow;
@@ -28,17 +26,18 @@ function renderCurrency(row: ApplicationRow, column: ColumnMeta): ReactNode {
 
 function renderBadge(row: ApplicationRow, column: ColumnMeta): ReactNode {
   const value = String(row[column.key as keyof ApplicationRow] ?? "");
-  return <span className={`badge badge-${value}`}>{value}</span>;
+  const classes = STATUS_BADGE_CLASSES[value] ?? DEFAULT_BADGE_CLASSES;
+  return <span className={`px-2 py-0.5 rounded-full text-sm capitalize ${classes}`}>{value}</span>;
 }
 
 function renderAction({ row, column, onAction }: CellRendererProps): ReactNode {
   const available = isActionAvailable(row, column.key);
   if (!available) {
-    return <span className="action action-disabled">—</span>;
+    return <span className="text-gray-400">—</span>;
   }
   const actionName = column.action ?? column.key;
   return (
-    <button type="button" className="action action-enabled" onClick={() => onAction?.(actionName, row)}>
+    <button type="button" className="cursor-pointer" onClick={() => onAction?.(actionName, row)}>
       {actionName}
     </button>
   );

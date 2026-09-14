@@ -1,16 +1,5 @@
-import type { ColumnMeta, LoadMode } from "../types";
-
-export interface ToolbarProps {
-  filterColumn?: ColumnMeta;
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-  filterValue: string;
-  onFilterChange: (value: string) => void;
-  loadMode: LoadMode;
-  onLoadModeChange: (mode: LoadMode) => void;
-}
-
-const LOAD_MODES: LoadMode[] = ["success", "empty", "error"];
+import { LOAD_MODES } from "./constants";
+import type { ToolbarProps } from "./types";
 
 export function Toolbar({
   filterColumn,
@@ -22,7 +11,7 @@ export function Toolbar({
   onLoadModeChange,
 }: ToolbarProps) {
   return (
-    <div className="toolbar">
+    <div className="flex gap-3 mb-4 items-center">
       <input
         type="text"
         placeholder="Szukaj..."
@@ -44,12 +33,13 @@ export function Toolbar({
           ))}
         </select>
       )}
-      <div className="load-mode-control">
+      <div className="flex gap-1">
         {LOAD_MODES.map((mode) => (
           <button
             key={mode}
             type="button"
             aria-pressed={loadMode === mode}
+            className={loadMode === mode ? "font-bold underline" : undefined}
             onClick={() => onLoadModeChange(mode)}
           >
             {mode}
